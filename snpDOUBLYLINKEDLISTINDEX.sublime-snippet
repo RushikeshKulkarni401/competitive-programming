@@ -1,0 +1,120 @@
+<snippet>
+  <content><![CDATA[
+template<class T, size_t MAXN>
+struct DLL_Index {
+
+public:
+    struct Node {
+        T val;
+        int prev, next;
+
+        friend ostream& operator<<(ostream& os, const Node& node) {
+            return os << "{val: " << node.val << "}";
+        }
+    };
+
+    int push_back(T val) {
+        int id = nxt_id++;
+        nodes[id] = {val, -1, -1};
+
+        if (head == -1) {
+            head = tail = id;
+        } else {
+            nodes[tail].next = id;
+            nodes[id].prev = tail;
+            tail = id;
+        }
+        siz++;
+        return id;
+    }
+
+    void erase(int id) {
+        int prv = nodes[id].prev;
+        int nxt = nodes[id].next;
+
+        if (prv == -1 && nxt == -1) {
+            head = tail = -1;
+        } else if (prv == -1) {
+            head = nxt;
+            nodes[nxt].prev = -1;
+        } else if (nxt == -1) {
+            tail = prv;
+            nodes[prv].next = -1;
+        } else {
+            nodes[prv].next = nxt;
+            nodes[nxt].prev = prv;
+        }
+        siz--;
+    }
+
+    Node* get_node(int id) {
+        return &nodes[id];
+    }
+
+    Node& operator[](int id) { return nodes[id]; }
+    const Node& operator[](int id) const { return nodes[id]; }
+
+    int get_head() const { return head; }
+    int get_tail() const { return tail; }
+
+    void clear() {
+        head = tail = -1;
+        siz = nxt_id = 0;
+    }
+
+    bool empty() const {
+        return siz == 0;
+    }
+
+    int size() const {
+        return siz;
+    }
+
+    friend ostream& operator<<(ostream& os, const DLL_Index& dll) {
+        os << "[ ";
+        for (int cur = dll.head; cur != -1; cur = dll.nodes[cur].next) {
+            os << dll.nodes[cur];
+            if (dll.nodes[cur].next != -1) os << " <-> ";
+        }
+        return os << " ] (size = " << dll.siz << ")";
+    }
+
+private:
+    Node nodes[MAXN];
+    int head = -1, tail = -1;
+    int siz = 0;
+    int nxt_id = 0;
+};
+
+/*
+--------------------- USER GUIDE ---------------------
+constexpr size_t MAX_SIZE = 1e5 + 5;
+DLL_Index<ll, MAX_SIZE> dll; // define with data type ans max_size
+
+int id1 = dll.push_back(1); // track ids after pushing nodes
+int id2 = dll.push_back(2);
+int id3 = dll.push_back(3);
+
+// use these ids to delete nodes
+dll.erase(id2);
+
+// access node with auto (NOT RECOMMENDED, ONLY WORK WITH idx, dll[idx])-
+auto node = dll[id1] or dll.get_node(id1);
+T val = node.val or dll[id1].val // access val from node
+int prvIdx = node.prev or dll[id1].prev; // access prev idx from node
+int nxtIdx = node.next or dll[id1].next // access next idx from node
+// prev/next are -1 if there are no previous/next nodes
+// if they are not -1, again access them with dll[prvIdx/nxtIdx]
+
+dll.size(); // returns size of dll
+dll.empty(); // returns true if dll is empty
+dll.get_head(); // returns index of head
+dll.get_tail(); // returns index of tail
+
+*/
+]]></content>
+  <tabTrigger>snpDOUBLYLINKEDLISTINDEX</tabTrigger>
+  <description>Doubly Linked List Fast Impl</description>
+  <!-- Optional: Set a scope to limit where the snippet will trigger -->
+  <!-- <scope >source.python</scope > -->
+</snippet>

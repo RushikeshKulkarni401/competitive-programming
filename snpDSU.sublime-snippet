@@ -1,0 +1,59 @@
+<snippet>
+  <content><![CDATA[
+// DSU with path compression & small to large merge
+struct DSU {
+    std::vector<int> parent, siz;
+    int comps;
+    
+    DSU() {}
+    DSU(int n) {
+        init(n);
+    }
+    
+    void init(int n) {
+        parent.resize(n);
+        std::iota(parent.begin(), parent.end(), 0);
+        siz.assign(n, 1);
+        comps = n;
+    }
+    
+    int find(int x) {
+        while (x != parent[x]) {
+            x = parent[x] = parent[parent[x]];
+        }
+        return x;
+    }
+    
+    bool same(int x, int y) {
+        return find(x) == find(y);
+    }
+    
+    bool merge(int x, int y) {
+        x = find(x);
+        y = find(y);
+        if (x == y) {
+            return false;
+        }
+        // small to large merging
+        if (siz[x] < siz[y])
+            swap(x, y);
+        siz[x] += siz[y];
+        parent[y] = x;
+        comps--;
+        return true;
+    }
+    
+    int getComps() {
+        return comps;
+    }
+
+    int size(int x) {
+        return siz[find(x)];
+    }
+};
+]]></content>
+  <tabTrigger>snpDSU</tabTrigger>
+  <description>Disjoint-Subset-Union</description>
+  <!-- Optional: Set a scope to limit where the snippet will trigger -->
+  <!-- <scope >source.python</scope > -->
+</snippet>

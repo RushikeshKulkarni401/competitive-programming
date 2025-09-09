@@ -1,0 +1,39 @@
+<snippet>
+  <content><![CDATA[
+#define accuracy chrono::steady_clock::now().time_since_epoch().count()
+
+mt19937 rng(accuracy);
+
+namespace codegen {
+
+    ll rand(ll l, ll r){
+      uniform_int_distribution<ll> uid(l, r); return uid(rng);
+    }
+
+    string genstr(ll len = 0, bool upperCase = false, ll l = 0, ll r = 25) {
+        assert(len >= 0 && len <= 5e6);
+        string str(len, (upperCase ? 'A' : 'a'));
+        for (char &ch: str) {
+            ch += rand(l, r);
+        }
+        return str;
+    }
+    vector<ll> genarr(ll len = 0, ll minRange = 0, ll maxRange = 1e9){
+        assert(len >= 0 and len <= 5e6);
+        vector<ll> a(len);
+        for (ll &x: a) x = rand(minRange, maxRange);
+        return a;
+    }
+    vector<ll> genperm(ll len = 0) {
+        vector<ll> perm(len);
+        iota(all(perm),1);
+        shuffle(perm.begin(),perm.end(), rng);
+        return perm;
+    }
+} using namespace codegen;
+]]></content>
+  <tabTrigger>snpRNG</tabTrigger>
+  <description>random Input Generator</description>
+  <!-- Optional: Set a scope to limit where the snippet will trigger -->
+  <!-- <scope >source.python</scope > -->
+</snippet>

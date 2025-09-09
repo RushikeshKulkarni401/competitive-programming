@@ -1,0 +1,112 @@
+<snippet>
+  <content><![CDATA[
+template<typename T>
+struct Fraction {
+    T num, den;
+
+    Fraction(T n = 0, T d = 1) {
+        if (d == 0) {
+            num = 1;
+            den = 0;
+        } else if (n == 0) {
+            num = 0;
+            den = 1;
+        } else {
+            T g = std::gcd(n, d);  // Requires C++17 or later
+            n /= g;
+            d /= g;
+            if (d < 0) n = -n, d = -d;
+            num = n;
+            den = d;
+        }
+    }
+
+    bool operator==(const Fraction& other) const {
+        return num == other.num && den == other.den;
+    }
+
+    bool operator<(const Fraction& other) const {
+        return 1ll * num * other.den < 1ll * other.num * den;
+    }
+};
+
+
+template <typename T>
+struct Line {
+    Fraction<T> slope;
+    Fraction<T> intercept; // If vertical, this is x = constant
+    long long len_sqr;
+    bool is_vertical;
+
+    Line(T x1, T y1, T x2, T y2) {
+        T dx = x2 - x1;
+        T dy = y2 - y1;
+        len_sqr = 1LL * dx * dx + 1LL * dy * dy;
+
+        if (dx == 0) {
+            is_vertical = true;
+            slope = Fraction<T>(1, 0); // vertical slope
+            intercept = Fraction<T>(x1, 1); // x = constant
+        } else {
+            is_vertical = false;
+            slope = Fraction<T>(dy, dx);
+            intercept = Fraction<T>(1LL * slope.den * y1 - 1LL * slope.num * x1, slope.den);
+        }
+    }
+
+    bool operator==(const Line& other) const {
+        return slope == other.slope && intercept == other.intercept;
+    }
+};
+
+
+struct CustomHash {
+    static uint64_t splitmix64(uint64_t x) {
+        x += 0x9e3779b97f4a7c15;
+        x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9;
+        x = (x ^ (x >> 27)) * 0x94d049bb133111eb;
+        return x ^ (x >> 31);
+    }
+
+    size_t operator()(uint64_t x) const {
+        static const uint64_t FIXED_RANDOM = chrono::steady_clock::now().time_since_epoch().count();
+        return splitmix64(x + FIXED_RANDOM);
+    }
+};
+
+template <typename T>
+inline void hash_combine(std::size_t& seed, const T& val) {
+    seed ^= CustomHash{}(std::hash<std::decay_t<T>>{}(val)) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+}
+
+namespace std {
+    template <typename T>
+    struct hash<Fraction<T>> {
+        size_t operator()(const Fraction<T>& f) const {
+            size_t seed = 0;
+            hash_combine(seed, f.num);
+            hash_combine(seed, f.den);
+            return seed;
+        }
+    };
+}
+
+namespace std {
+    template <typename T>
+    struct hash<Line<T>> {
+        size_t operator()(const Line<T>& l) const {
+            size_t seed = 0;
+            hash_combine(seed, l.slope);
+            hash_combine(seed, l.intercept);
+            hash_combine(seed, l.len_sqr);
+            hash_combine(seed, l.is_vertical);
+            return seed;
+        }
+    };
+}
+]]></content>
+  <tabTrigger>snpLINE</tabTrigger>
+  <description>Geo-Line</description>
+  <!-- Optional: Set a scope to limit where the snippet will trigger -->
+  <!-- <scope >source.python</scope > -->
+</snippet>

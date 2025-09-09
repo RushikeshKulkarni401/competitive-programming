@@ -1,0 +1,89 @@
+<snippet>
+  <content><![CDATA[
+#include <sys/time.h>    
+typedef uint64_t ull;
+static int C; // initialized below
+
+// Arithmetic mod two primes and 2^32 simultaneously.
+// "typedef uint64_t H;" instead if Thue-Morse does not apply.
+template<int M, class B>
+struct A {
+    int x; B b; A(int x=0) : x(x), b(x) {}
+    A(int x, B b) : x(x), b(b) {}
+    A operator+(A o){int y = x+o.x; return{y - (y>=M)*M, b+o.b};}
+    A operator-(A o){int y = x-o.x; return{y + (y< 0)*M, b-o.b};}
+    A operator*(A o) { return {(int)(1LL*x*o.x % M), b*o.b}; }
+    explicit operator ull() { return x ^ (ull) b << 21; }
+    bool operator==(A o) const { return (ull)*this == (ull)o; }
+    bool operator<(A o) const { return (ull)*this < (ull)o; }
+};
+typedef A<1000000007, A<1000000009, unsigned int>> H;
+
+ll getH1(H cur_h) { return cur_h.x; }  // returns 1st hash
+ll getH2(H cur_h) { return cur_h.b.x; }  // returns 2nd hash
+ll equals(H h1, H h2) { return getH1(h1) == getH1(h2) && getH2(h1) == getH2(h2); }
+
+// Overload the << operator to print the two hash components of H
+std::ostream& operator<<(std::ostream& os, const H& h) {
+    os << "{" << getH1(h) << ", " << getH2(h) << "}"; // Printing the first and second hashes
+    return os;
+}
+
+// encoding m1 m2 hashes, skipping unsigned hash
+ll enc_hash(H cur_h) { ll x = getH1(cur_h); x <<= 31; x += getH2(cur_h); return x; }
+
+vector<H> c_pwr;
+H P(int x) {
+    while(sz(c_pwr) < x + 1){
+        c_pwr.push_back(c_pwr.back() * C);
+    };
+    return c_pwr[x];
+}
+
+template <class T> 
+struct HashInterval {
+    vector<H> ha;
+    HashInterval(T& str) : ha(sz(str)+1) {
+        for (ll i = 0; i < sz(str); i++)
+            ha[i+1] = ha[i] * C + str[i];
+    }
+    H hashInterval(int a, int b) { // hash [a, b)
+        return ha[b] - ha[a] * P(b - a);
+    }
+};
+
+
+// returns hashes of all substrings of length = `length`
+template <class T>
+vector<H> getHashes(T& str, int length) {
+    if (sz(str) < length) return {};
+    H h = 0;
+    for (ll i = 0; i < length; i++)
+        h = h * C + str[i];
+    vector<H> ret = {h};
+    for (ll i = length; i < sz(str); i++) {
+        ret.push_back(h = h * C + str[i] - P(length) * str[i-length]);
+    }
+    return ret;
+}
+
+template<class T> H hashString(T& s){H h{}; for(char c:s) h=h*C+c;return h;}
+
+void setup_hash() {
+    timeval tp;
+    gettimeofday(&tp, 0);
+    C = (int)tp.tv_usec;
+    c_pwr.resize(1, 1);
+}
+
+/*
+    ### Paste in main ###
+    setup_hash();
+*/
+
+]]></content>
+  <tabTrigger>snpHASH</tabTrigger>
+  <description>Triple Mod Hash</description>
+  <!-- Optional: Set a scope to limit where the snippet will trigger -->
+  <!-- <scope >source.python</scope > -->
+</snippet>

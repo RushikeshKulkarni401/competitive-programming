@@ -1,0 +1,30 @@
+<snippet>
+  <content><![CDATA[
+const int mxSieve = 1000006;
+bitset<mxSieve> sve;
+int spf[mxSieve];
+vector<ll> primes;
+bool isPrime(ll x) {
+    return !sve[x];
+}
+void sieve(ll MX=mxSieve){
+    iota(spf, spf + MX, 0);
+    sve[0] = sve[1] = 1;
+    for(long long i = 2; i * i < MX; i++){
+        if(sve[i]) continue;
+        for(long long j = i * i; j < MX; j += i){
+            sve[j] = 1;
+            if (spf[j] == j) 
+                spf[j] = i;
+        }
+    }
+    for(int i = 2; i < MX; i++){
+        if(!sve[i]) primes.push_back(i);
+    }
+}
+]]></content>
+  <tabTrigger>snpSIEVE</tabTrigger>
+  <description>sieve_nlogn</description>
+  <!-- Optional: Set a scope to limit where the snippet will trigger -->
+  <!-- <scope >source.python</scope > -->
+</snippet>

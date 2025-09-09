@@ -1,0 +1,110 @@
+<snippet>
+  <content><![CDATA[
+#ifdef ONLINE_JUDGE
+#include <bits/stdc++.h>
+#define dbg(...)
+#else
+#include <algo/dbg.h>  
+#endif
+using namespace std; 
+ 
+// X.find_by_order(k) return iterator to kth element. 0 indexed.
+// X.order_of_key(k) returns count of elements strictly less than k.
+
+// ** behaviour of lower_bound and upper_bound are reversed in ordered_multiset ** // 
+// #define ook order_of_key
+// #define fbo find_by_order 
+// #include <ext/pb_ds/assoc_container.hpp>
+// #include <ext/pb_ds/tree_policy.hpp>
+// template <class T>
+// using ordered_set =  __gnu_pbds::tree<T,__gnu_pbds::null_type,less<T>,__gnu_pbds::rb_tree_tag,__gnu_pbds::tree_order_statistics_node_update>;
+// using ordered_multiset =  __gnu_pbds::tree<T,__gnu_pbds::null_type,less_equal<T>,__gnu_pbds::rb_tree_tag,__gnu_pbds::tree_order_statistics_node_update>;
+ 
+#define nl '\n'
+#define pb push_back
+#define eb emplace_back
+#define fi first
+#define se second
+#define vt vector
+#define here() dbg(__LINE__)
+#define all(x) begin(x), end(x)
+#define rall(x) rbegin(x), rend(x)
+#define sz(x) ((ll)(x).size())
+#define YES(x) cout<<(x?"YES\n":"NO\n")
+#define Yes(x) cout<<(x?"Yes\n":"No\n")
+#define inp(v) for(auto& x : v) cin >> x;
+#define rep(i,a,b) for(int i = a; i < b; i++)
+#define uniq(x) {x.erase(unique(all(x)), x.end()); }
+ 
+using ll = long long int;
+using i128 = __int128;
+using pii = pair<ll,ll>;
+using vi = vt<ll>;
+using vpii = vt<pii>;
+using vvi = vt<vi>;
+using vvvi = vt<vvi>;
+using vvpii = vt<vpii>;
+template<class T> using min_heap = priority_queue<T, vector<T>, greater<T>>;
+ 
+const auto start_time = std::chrono::high_resolution_clock::now();
+void runtime()
+{
+    auto end_time = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double,milli> diff = end_time-start_time;
+    cerr<<"Time: "<<roundl(diff.count())<<"ms\n";
+}
+ 
+string to_string(char c) { return string(1, c); }
+template<class T, class U> auto min(const T& a, const U& b) -> typename std::common_type<T, U>::type { return b < a ? b : a; }
+template<class T, class U> auto max(const T& a, const U& b) -> typename std::common_type<T, U>::type { return b > a ? b : a; }
+template<class T, class U> bool chmin(T& a, const U& b) { return b < a ? a = b, 1 : 0; }
+template<class T, class U> bool chmax(T& a, const U& b) { return a < b ? a = b, 1 : 0; }
+template<class T> int LB(vector<T> &v,T a){return lower_bound(v.begin(),v.end(),a)-v.begin();}
+template<class T> int UB(vector<T> &v,T a){return upper_bound(v.begin(),v.end(),a)-v.begin();}
+template<class T> T vec_min(const vector<T>& a) { assert(!a.empty()); return *min_element(all(a)); }
+template<class T> T vec_max(const vector<T>& a) { assert(!a.empty()); return *max_element(all(a)); }
+template<class T> int vec_min_idx(const vector<T>& a) { assert(!a.empty()); return int(min_element(all(a)) - a.begin()); }
+template<class T> int vec_max_idx(const vector<T>& a) { assert(!a.empty()); return int(max_element(all(a)) - a.begin()); }
+template<class T> T vec_sum(const vector<T>& a) { return accumulate(all(a), T(0)); }
+
+namespace Assert {
+    template<typename... Args>
+    static void check(bool condition, const char* cond_str, int line, Args&&... args) {
+        if (!condition) {
+            cerr << "Line " << line << ": Assertion failed [" << cond_str << "]";
+            ((cerr << ": " << args), ...);
+            cerr << '\n';
+            abort();
+        }
+    }
+};
+#define Assert(cond, ...) Assert::check((cond), #cond, __LINE__, ##__VA_ARGS__)
+ 
+const ll MOD1000000007 = 1e9 + 7;
+const ll MOD998244353 = 998244353;
+const ll INF = 1e18;
+const ll N = 2e5 + 5;
+
+void solve(int test_case)
+{${0}} 
+
+int32_t main() 
+{
+    ios_base::sync_with_stdio(false);
+    cout << fixed << setprecision(10);
+    cin.tie(NULL);
+
+    int t = 1;
+    cin >> t;
+    
+    for(int i = 1; i <= t; i++){
+        solve(i);
+    }
+    runtime(); 
+}
+]]></content>
+  <tabTrigger>snpCP</tabTrigger>
+  <description>snippetCP</description>
+  <!-- Optional: Set a scope to limit where the snippet will trigger -->
+  <!-- <scope >source.python</scope > -->
+</snippet>

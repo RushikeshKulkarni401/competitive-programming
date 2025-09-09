@@ -1,0 +1,28 @@
+[
+	{ 
+		"keys": ["ctrl+shift+z"], 
+	    "command": "cancel_build" 
+	},
+
+    {
+        "keys": ["ctrl+shift+b"],
+        "command": "build",
+        "args": {
+            "variant": "Build Only"
+        }
+    },
+
+    { // 1 left pane, 2 split (bottom/top) right panes
+        "keys": ["alt+3"],
+        "command": "set_layout",
+        "args": {
+          "cols": [0.0, 0.5, 1.0], //offers 2 columns
+          "rows": [0.0, 0.5, 1.0], //offers 2 rows
+          "cells": [ //each array is one pane
+            [0, 0, 1, 2], //first pane: column 0 - 1, row 0 - 2
+            [1, 1, 2, 2], //second pane: column 1 - 2, row 1 - 2
+            [1, 0, 2, 2], //third pane: column 1 - 2, row 0 - 2
+          ]
+        }
+  }
+] 	

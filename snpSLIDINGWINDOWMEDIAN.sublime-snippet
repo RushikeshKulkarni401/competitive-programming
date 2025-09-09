@@ -1,0 +1,92 @@
+<snippet>
+  <content><![CDATA[
+// left holds at max 1 extra element than right 
+// lower_median is last element of left
+// interpolated_median is (last(left) + first(right))/2
+
+template<class T>
+struct SlidingWindowMedian {
+
+    // add according to value of x : smart add
+    void add(T x){
+        if(left.empty() || x < *left.rbegin()){
+            left.insert(x);
+            left_sum += x;
+        } else {
+            right.insert(x);
+            right_sum += x;
+        }
+        siz++;
+        rebalance();
+    }
+
+    void remove(T x) {
+        assert(siz > 0);
+        auto it = left.find(x);
+        if(it != left.end()){
+            left.erase(it);
+            left_sum -= x;
+            siz--;
+        } else {
+            it = right.find(x);
+            if(it != right.end()){
+                right.erase(it);
+                right_sum -= x;
+                siz--;
+            }else{
+                assert(false && "Element to be deleted not found");
+            }
+        }
+        rebalance();
+    }
+
+    T lower_median() const{
+        assert(!left.empty());
+        return *left.rbegin();
+    }
+
+    auto interpolated_median() const -> decltype((1.0 * T() + T()) / 2.0) {
+        if(siz & 1){
+            return lower_median();
+        } else {
+            assert(!left.empty() && !right.empty());
+            return (1.0 * *left.rbegin() + *right.begin()) / 2.0;
+        }
+    }
+
+private:
+    multiset<T> left; 
+    multiset<T> right;
+    size_t siz = 0;
+    T left_sum = 0, right_sum = 0;
+
+    void rebalance(){
+        while((int)left.size() < (int)right.size()){
+            // shift first right to left
+            auto it = right.begin();
+            T val = *it;
+            right.erase(it);
+            right_sum -= val;
+            left.insert(val);
+            left_sum += val;
+        }
+        while((int)left.size() > (int)right.size() + 1){
+            // shift last left to right
+            auto it = prev(left.end());
+            T val = *it;
+            left.erase(it);
+            left_sum -= val;
+            right.insert(val);
+            right_sum += val;
+        }
+    }
+};
+
+template<class T>
+using SWM = SlidingWindowMedian<T>;
+]]></content>
+  <tabTrigger>snpSlidingWindowMedian</tabTrigger>
+  <description>Sliding window median</description>
+  <!-- Optional: Set a scope to limit where the snippet will trigger -->
+  <!-- <scope >source.python</scope > -->
+</snippet>

@@ -1,0 +1,28 @@
+<snippet>
+  <content><![CDATA[
+// Function to find the shortest distance of all the vertices from the source vertex src.
+template<class T, class U>
+vector<long long> dijkstra(vector<vector<pair<T, U>>> &adj, T src) {
+    int n = adj.size();
+    vector<U> dis(n, INF);
+    dis[src] = 0;
+    set<pair<U, T>> s;
+    s.insert({dis[src], src});
+    while (!s.empty()) {
+        auto [_, u] = *s.begin(); s.erase(s.begin()); // should not use `&[_,u]` here
+        for (auto &[v, w] : adj[u]) {
+            if (dis[v] > dis[u] + w) {
+                s.erase({dis[v], v});
+                dis[v] = dis[u] + w;
+                s.insert({dis[v], v});
+            }
+        }
+    }
+    return dis;
+}
+]]></content>
+  <tabTrigger>snpDIJKS</tabTrigger>
+  <description>Dijsktra algo</description>
+  <!-- Optional: Set a scope to limit where the snippet will trigger -->
+  <!-- <scope >source.python</scope > -->
+</snippet>

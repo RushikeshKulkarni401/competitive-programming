@@ -1,0 +1,11 @@
+{
+	"font_size": 11,
+	"color_scheme": "Mariana.sublime-color-scheme",
+	"theme": "Adaptive.sublime-theme",
+	"ignored_packages":
+	[
+		"SublimeLinter",
+		"Vintage",
+	],
+	"index_files": true,
+}

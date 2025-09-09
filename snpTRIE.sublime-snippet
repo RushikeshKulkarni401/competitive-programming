@@ -1,0 +1,85 @@
+<snippet>
+  <content><![CDATA[
+template<typename T, size_t SIZE, T OFFSET>
+struct Trie {
+private:
+    struct Node {
+        Node* links[SIZE];
+        bool endFlag;
+
+        Node() : endFlag(false) {
+            for (int i = 0; i < SIZE; ++i)
+                links[i] = nullptr;
+        }
+
+        ~Node() {
+            for (int i = 0; i < SIZE; ++i)
+                delete links[i];
+        }
+
+        void setEnd() {
+            endFlag = true;
+        }
+
+        bool isEnd() const {
+            return endFlag;
+        }
+
+        bool has(T c) const {
+            return links[c - OFFSET] != nullptr;
+        }
+
+        Node* get(T c) const {
+            return links[c - OFFSET];
+        }
+
+        Node* getOrPut(T c) {
+            int idx = c - OFFSET;
+            if (!links[idx])
+                links[idx] = new Node();
+            return links[idx];
+        }
+    };
+
+    Node* root;
+
+public:
+    Trie() : root(new Node()) {}
+
+    ~Trie() {
+        delete root;
+    }
+
+    void insert(const basic_string<T>& word) {
+        Node* cur = root;
+        for (const T& c : word)
+            cur = cur->getOrPut(c);
+        cur->setEnd();
+    }
+
+    bool search(const basic_string<T>& word) const {
+        Node* cur = root;
+        for (const T& c : word) {
+            if (!cur->has(c))
+                return false;
+            cur = cur->get(c);
+        }
+        return cur->isEnd();
+    }
+
+    bool startsWith(const basic_string<T>& prefix) const {
+        Node* cur = root;
+        for (const T& c : prefix) {
+            if (!cur->has(c))
+                return false;
+            cur = cur->get(c);
+        }
+        return true;
+    }
+};
+]]></content>
+  <tabTrigger>snpTRIE</tabTrigger>
+  <description>snippet-TRIE</description>
+  <!-- Optional: Set a scope to limit where the snippet will trigger -->
+  <!-- <scope >source.python</scope > -->
+</snippet>

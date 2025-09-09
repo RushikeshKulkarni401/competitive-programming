@@ -1,0 +1,32 @@
+<snippet>
+  <content><![CDATA[
+// longest common suffix ending at i which is prefix of string as well
+vector<int> prefix_function(string s) {
+    int n = (int)s.length();
+    vector<int> pi(n);
+    for (int i = 1; i < n; i++) {
+        int j = pi[i-1];
+        while (j > 0 && s[i] != s[j])
+            j = pi[j-1];
+        if (s[i] == s[j])
+            j++;
+        pi[i] = j;
+    }
+    return pi;
+}
+
+vector<int> find_occurences(string& text, string& pattern) {
+    int n = text.size(), m = pattern.size();
+    vector<int> lps = prefix_function(pattern + "#" + text);
+    vector<int> occurences;
+    for (int i = m + 1; i <= n + m; i++)
+        if (lps[i] == m)
+            occurences.push_back(i - 2 * m);
+    return occurences;
+}
+]]></content>
+  <tabTrigger>snpKMP</tabTrigger>
+  <description>KMP string search</description>
+  <!-- Optional: Set a scope to limit where the snippet will trigger -->
+  <!-- <scope >source.python</scope > -->
+</snippet>

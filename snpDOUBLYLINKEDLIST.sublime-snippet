@@ -1,0 +1,108 @@
+<snippet>
+  <content><![CDATA[
+template<class T>
+struct DoublyLinkedList {
+    struct Node {
+        T info;
+        Node* prev;
+        Node* next;
+
+        Node() : Node(0) {}
+        Node(T _info) : info(_info), prev(nullptr), next(nullptr) {}
+
+        friend ostream& operator<<(ostream& os, const Node* node) {
+            if (node == nullptr) return os << "NULL";
+            return os << "{info: " << node->info << "}";
+        }
+    };
+
+    DoublyLinkedList() : siz(0), head(nullptr), tail(nullptr) {}
+
+    void push_back(Node* new_node) {
+        assert(new_node != nullptr);
+        if (head == nullptr) {
+            head = tail = new_node;
+        } else {
+            tail->next = new_node;
+            new_node->prev = tail;
+            tail = new_node;
+        }
+        siz++;
+    }
+
+    void erase(Node* del_node) {
+        assert(del_node != nullptr);
+
+        if (del_node->prev == nullptr && del_node->next == nullptr) {
+            head = tail = nullptr;
+        } else if (del_node->prev == nullptr) {
+            head = del_node->next;
+            head->prev = nullptr;
+        } else if (del_node->next == nullptr) {
+            tail = del_node->prev;
+            tail->next = nullptr;
+        } else {
+            del_node->prev->next = del_node->next;
+            del_node->next->prev = del_node->prev;
+        }
+
+        delete del_node;
+        siz--;
+    }
+
+    void clear() {
+        Node* cur = head;
+        while (cur) {
+            Node* nxt = cur->next;
+            delete cur;
+            cur = nxt;
+        }
+        head = tail = nullptr;
+        siz = 0;
+    }
+
+    Node* get_head() const { return head; }
+    Node* get_tail() const { return tail; }
+    int size() const { return siz; }
+    bool empty() const { return siz == 0; }
+
+    friend ostream& operator<<(ostream& os, const DoublyLinkedList& dll) {
+        os << "[ ";
+        Node* cur = dll.get_head();
+        while (cur != nullptr) {
+            os << cur;
+            if (cur->next) os << " <-> ";
+            cur = cur->next;
+        }
+        os << " ] (size = " << dll.size() << ")";
+        return os;
+    }
+
+private:
+    Node* head;
+    Node* tail;
+    int siz;
+};
+
+using IntDLL = DoublyLinkedList<ll>;
+using IntNode = IntDLL::Node;
+
+/*
+------------------ USER GUIDE ------------------
+    IntDLL dll; // declaration
+    
+    IntNode* node = new IntNode(1); // creating node
+    dll.push_back(node); // pushes node to the end of DLL
+    dll.delete_node(node); // deletes specified node
+
+    dll.empty();    // return true if empty
+    dll.size();     // returns size
+    dll.get_head(); // return head
+    dll.get_tail(); // returns tail
+*/
+]]></content>
+  <tabTrigger>snpDOUBLYLINKEDLIST</tabTrigger>
+  <description>Doubly Linked List</description>
+  <!-- Optional: Set a scope to limit where the snippet will trigger -->
+  <!-- <scope >source.python</scope > -->
+</snippet>

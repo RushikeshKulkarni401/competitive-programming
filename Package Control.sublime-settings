@@ -1,0 +1,17 @@
+{
+	"installed_packages":
+	[
+		"Neon Color Scheme",
+		"Package Control",
+		"SublimeLinter",
+		"SublimeLinter-annotations",
+		"SublimeLinter-clang",
+		"SublimeLinter-cppcheck",
+		"SublimeLinter-cpplint",
+	],
+	"in_process_packages":
+	[
+		"SublimeLinter",
+	],
+	"bootstrapped": true,
+}

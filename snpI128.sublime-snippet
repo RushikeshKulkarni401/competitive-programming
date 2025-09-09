@@ -1,0 +1,15 @@
+<snippet>
+  <content><![CDATA[
+std::ostream& operator<<(std::ostream& os, __int128 val) {
+    char buf[50], *p = buf + 49; *p = '\0';
+    bool neg = val < 0; if (neg) val = -val;
+    do { *--p = '0' + (val % 10); val /= 10; } while (val);
+    if (neg) *--p = '-';
+    return os.write(p, buf + 49 - p);
+}
+]]></content>
+  <tabTrigger>snpI128</tabTrigger>
+  <description>Print 50 digit long int</description>
+  <!-- Optional: Set a scope to limit where the snippet will trigger -->
+  <!-- <scope >source.python</scope > -->
+</snippet>
