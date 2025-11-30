@@ -66,19 +66,6 @@ template<class T> T vec_max(const vector<T>& a) { assert(!a.empty()); return *ma
 template<class T> int vec_min_idx(const vector<T>& a) { assert(!a.empty()); return int(min_element(all(a)) - a.begin()); }
 template<class T> int vec_max_idx(const vector<T>& a) { assert(!a.empty()); return int(max_element(all(a)) - a.begin()); }
 template<class T> T vec_sum(const vector<T>& a) { return accumulate(all(a), T(0)); }
-
-namespace Assert {
-    template<typename... Args>
-    static void check(bool condition, const char* cond_str, int line, Args&&... args) {
-        if (!condition) {
-            cerr << "Line " << line << ": Assertion failed [" << cond_str << "]";
-            ((cerr << ": " << args), ...);
-            cerr << '\n';
-            abort();
-        }
-    }
-};
-#define Assert(cond, ...) Assert::check((cond), #cond, __LINE__, ##__VA_ARGS__)
  
 const ll MOD1000000007 = 1e9 + 7;
 const ll MOD998244353 = 998244353;

@@ -1,0 +1,148 @@
+<snippet>
+  <content><![CDATA[
+/**
+ * ===================== MO'S ALGORITHM TEMPLATE =====================
+ *
+ * Supports:
+ *   - Offline range queries on static array
+ *   - Complexity: O( (N + Q) * sqrt(N) )
+ *
+ * How to use:
+ *   1. Fill your array `a[]`
+ *   2. Implement add(pos), remove(pos)
+ *   3. Implement get_answer()
+ *   4. Add queries using add_query(l, r, idx)
+ *   5. Call process() → returns vector of (idx, answer)
+ *
+ * This template stores queries in (l, r, idx) and sorts by Mo’s order.
+ * Block size = sqrt(n).  Query order reduces add/remove operations.
+ */
+
+template<typename T, typename U>
+class MosAlgorithm {
+private:
+    int n, block_size;
+
+    // each query is (l, r, original_index)
+    vector<tuple<int,int,int>> queries;
+
+    // user-defined callbacks (all required)
+    function<void(int)> add_cb;         // add element at index
+    function<void(int)> remove_cb;      // remove element at index
+    function<U()> get_answer_cb;        // return answer for current window
+
+public:
+    MosAlgorithm(int _n,
+                 function<void(int)> _add,
+                 function<void(int)> _remove,
+                 function<U()> _get_ans)
+        : n(_n), add_cb(_add), remove_cb(_remove), get_answer_cb(_get_ans)
+    {
+        block_size = sqrt(n) + 1;
+    }
+
+    // add query [l, r]
+    inline void add_query(int l, int r, int idx) {
+        queries.emplace_back(l, r, idx);
+    }
+
+    // run Mo's algorithm → returns answers (idx, answer)
+    vector<pair<int,U>> process() {
+        // Sort queries in Mo order
+        sort(queries.begin(), queries.end(), [&](auto &A, auto &B) {
+            auto [l1, r1, i1] = A;
+            auto [l2, r2, i2] = B;
+
+            int b1 = l1 / block_size;
+            int b2 = l2 / block_size;
+
+            if (b1 != b2) return b1 < b2;
+
+            // EVEN-ODD optimization (optional) :: need to study more on this
+            // not always works
+            // return (b1 & 1) ? r1 > r2 : r1 < r2; 
+            return r1 < r2; // works always
+        });
+
+        vector<pair<int,U>> answers;
+        answers.reserve(queries.size());
+
+        int cur_l = 0, cur_r = -1;
+
+        for (auto &[l, r, idx] : queries) {
+            // Expand / shrink to [l, r]
+
+            // expand right
+            while (cur_r < r) add_cb(++cur_r);
+
+            // shrink right
+            while (cur_r > r) remove_cb(cur_r--);
+
+            // expand left
+            while (cur_l > l) add_cb(--cur_l);
+
+            // shrink left
+            while (cur_l < l) remove_cb(cur_l++);
+            
+            // get answer for this query window
+            answers.emplace_back(idx, get_answer_cb());
+        }
+
+        return answers;
+    }
+};
+
+/*
+=========================== USAGE EXAMPLE ===========================
+
+int n = ...;
+vector<int> a(n);
+
+// Your frequency array or DS
+vector<int> freq(MAXN);
+long long cur_answer = 0;
+
+// Add element at index i
+auto add_cb = [&](int i) {
+    int x = a[i];
+    // update freq and answer
+};
+
+// Remove element at index i
+auto remove_cb = [&](int i) {
+    int x = a[i];
+    // update freq and answer
+};
+
+// Return answer for current window
+auto get_answer_cb = [&]() -> long long {
+    return cur_answer;
+};
+
+// Build Mo structure
+MosAlgorithm<int,long long> mo(n, add_cb, remove_cb, get_answer_cb);
+
+// Add queries
+for (int qi = 0; qi < q; qi++) {
+    int l, r;
+    cin >> l >> r;
+    mo.add_query(l, r, qi);
+}
+
+// Process queries
+auto ans = mo.process();
+
+// Restore order by idx
+vector<long long> final_ans(q);
+for (auto &[i, val] : ans) final_ans[i] = val;
+
+=====================================================================
+*/
+
+
+]]></content>
+  <tabTrigger>snpMOSALGORITHM</tabTrigger>
+  <description>Mo's Algorithm</description>
+  <!-- Optional: Set a scope to limit where the snippet will trigger -->
+  <!-- <scope >source.python</scope > -->
+</snippet>

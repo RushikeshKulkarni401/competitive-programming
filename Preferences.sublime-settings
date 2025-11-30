@@ -4,7 +4,6 @@
 	"theme": "Adaptive.sublime-theme",
 	"ignored_packages":
 	[
-		"SublimeLinter",
 		"Vintage",
 	],
 	"index_files": true,

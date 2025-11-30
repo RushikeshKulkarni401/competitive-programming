@@ -1,11 +1,11 @@
 {
-    "cmd": ["g++.exe", "-std=c++20", "-static","-static-libgcc","-static-libstdc++","${file}",
+    "cmd": ["g++.exe", "-std=c++23", "-static","-static-libgcc","-static-libstdc++","${file}",
             "-o", "${file_base_name}.exe",
             "&&", "${file_base_name}.exe<inputf.in>outputf.out"],
     "variants": [
         {
             "name": "Build Only",
-            "cmd": ["g++.exe", "-std=c++17", "-static","-static-libgcc","-static-libstdc++","${file}",
+            "cmd": ["g++.exe", "-std=c++23", "-static","-static-libgcc","-static-libstdc++","${file}",
             "-o", "${file_base_name}.exe"]
         }
     ],
