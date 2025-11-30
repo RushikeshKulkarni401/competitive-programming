@@ -8,6 +8,7 @@
  *   - remove(x)
  *   - lower_median()              -> exact median for odd size
  *   - interpolated_median()       -> average of two middles for even size
+ *   - sum_absolute_deviation()     -> sum(|x - median|) in current window
  *
  * Invariants:
  *   - `left`  contains the smaller half
@@ -76,6 +77,15 @@ struct SlidingWindowMedian {
         }
         assert(!right.empty());
         return (1.0 * (*left.rbegin()) + (*right.begin())) / 2.0;
+    }
+
+    /** Sum of absolute deviations from the lower median */
+    long long sum_absolute_deviation() const {
+        assert(!left.empty());
+        long long med = lower_median();
+        long long left_contrib  = (long long)left.size() * med - left_sum;
+        long long right_contrib = right_sum - (long long)right.size() * med;
+        return left_contrib + right_contrib;
     }
 
 private:
