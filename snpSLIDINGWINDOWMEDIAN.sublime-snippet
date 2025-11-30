@@ -1,68 +1,94 @@
 <snippet>
   <content><![CDATA[
-// left holds at max 1 extra element than right 
-// lower_median is last element of left
-// interpolated_median is (last(left) + first(right))/2
+/**
+ * @brief Sliding Window Median (SWM)
+ *
+ * Maintains a dynamic multiset supporting:
+ *   - add(x)
+ *   - remove(x)
+ *   - lower_median()              -> exact median for odd size
+ *   - interpolated_median()       -> average of two middles for even size
+ *
+ * Invariants:
+ *   - `left`  contains the smaller half
+ *   - `right` contains the larger half
+ *   - |left| == |right|  OR  |left| == |right| + 1
+ *   - median = last element in `left`
+ *
+ * Complexity:
+ *   add/remove: O(log n)
+ *   query median: O(1)
+ */
 
 template<class T>
 struct SlidingWindowMedian {
 
-    // add according to value of x : smart add
-    void add(T x){
-        if(left.empty() || x < *left.rbegin()){
+    /** Insert element x. */
+    void add(T x) {
+        if (left.empty() || x <= *left.rbegin()) {
             left.insert(x);
             left_sum += x;
         } else {
             right.insert(x);
             right_sum += x;
         }
-        siz++;
+        total_size++;
         rebalance();
     }
 
+    /** Remove existing element x. */
     void remove(T x) {
-        assert(siz > 0);
+        assert(total_size > 0);
+
         auto it = left.find(x);
-        if(it != left.end()){
+        if (it != left.end()) {
             left.erase(it);
             left_sum -= x;
-            siz--;
         } else {
             it = right.find(x);
-            if(it != right.end()){
-                right.erase(it);
-                right_sum -= x;
-                siz--;
-            }else{
-                assert(false && "Element to be deleted not found");
+            if (it == right.end()) {
+                assert(false && "Attempted to remove element not present in SWM");
             }
+            right.erase(it);
+            right_sum -= x;
         }
+
+        total_size--;
         rebalance();
     }
 
-    T lower_median() const{
+    /** Lower median = middle element (for odd), left middle (for even). */
+    T lower_median() const {
         assert(!left.empty());
         return *left.rbegin();
     }
 
-    auto interpolated_median() const -> decltype((1.0 * T() + T()) / 2.0) {
-        if(siz & 1){
+    /**
+     * @return Median as double:
+     *   odd size → exact median
+     *   even size → average of two middles
+     */
+    auto interpolated_median() const
+        -> decltype((1.0 * T() + T()) / 2.0)
+    {
+        if (total_size & 1) {
             return lower_median();
-        } else {
-            assert(!left.empty() && !right.empty());
-            return (1.0 * *left.rbegin() + *right.begin()) / 2.0;
         }
+        assert(!right.empty());
+        return (1.0 * (*left.rbegin()) + (*right.begin())) / 2.0;
     }
 
 private:
-    multiset<T> left; 
-    multiset<T> right;
-    size_t siz = 0;
-    T left_sum = 0, right_sum = 0;
+    multiset<T> left;   ///< behaves like max-heap (largest at end)
+    multiset<T> right;  ///< behaves like min-heap (smallest at begin)
 
-    void rebalance(){
-        while((int)left.size() < (int)right.size()){
-            // shift first right to left
+    size_t total_size = 0;
+    long long left_sum = 0, right_sum = 0;
+
+    /** Restore size invariants between left and right. */
+    void rebalance() {
+        // Case 1: Move small element from right → left
+        while (left.size() < right.size()) {
             auto it = right.begin();
             T val = *it;
             right.erase(it);
@@ -70,8 +96,8 @@ private:
             left.insert(val);
             left_sum += val;
         }
-        while((int)left.size() > (int)right.size() + 1){
-            // shift last left to right
+        // Case 2: Move large element from left → right
+        while (left.size() > right.size() + 1) {
             auto it = prev(left.end());
             T val = *it;
             left.erase(it);
@@ -84,6 +110,7 @@ private:
 
 template<class T>
 using SWM = SlidingWindowMedian<T>;
+
 ]]></content>
   <tabTrigger>snpSlidingWindowMedian</tabTrigger>
   <description>Sliding window median</description>
