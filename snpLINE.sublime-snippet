@@ -1,18 +1,40 @@
 <snippet>
   <content><![CDATA[
+
+/**
+ * Fraction<T>
+ * -------------
+ * Rational number implementation with automatic normalization.
+ *
+ * Invariants:
+ *  - den > 0 for all finite fractions
+ *  - gcd(num, den) = 1
+ *  - den == 0 represents infinity
+ *
+ * Supports:
+ *  - +, -, *, /
+ *  - comparison
+ *  - inverse
+ *  - hashing
+ */
 template<typename T>
 struct Fraction {
     T num, den;
 
+    /**
+     * Constructs fraction n/d.
+     * Automatically reduces and normalizes sign.
+     * If d == 0 -> represents infinity.
+     */
     Fraction(T n = 0, T d = 1) {
         if (d == 0) {
             num = 1;
-            den = 0;
+            den = 0;   // represents infinity
         } else if (n == 0) {
             num = 0;
             den = 1;
         } else {
-            T g = std::gcd(n, d);  // Requires C++17 or later
+            T g = std::gcd(n, d);
             n /= g;
             d /= g;
             if (d < 0) n = -n, d = -d;
@@ -21,16 +43,87 @@ struct Fraction {
         }
     }
 
+    /** Returns true if fraction represents infinity */
+    bool isInfinity() const {
+        return den == 0;
+    }
+
+    /** Equality comparison */
     bool operator==(const Fraction& other) const {
         return num == other.num && den == other.den;
     }
 
+    /** Strict comparison using cross multiplication */
     bool operator<(const Fraction& other) const {
         return 1ll * num * other.den < 1ll * other.num * den;
     }
+
+    /**
+     * Returns multiplicative inverse.
+     * Throws if fraction is zero.
+     */
+    Fraction inv() const {
+        if (num == 0) {
+            throw std::runtime_error("Division by zero fraction");
+        }
+        return Fraction(den, num);
+    }
+
+    /** Addition */
+    Fraction operator+(const Fraction& other) const {
+        T n = num * other.den + other.num * den;
+        T d = den * other.den;
+        return Fraction(n, d);
+    }
+
+    /** Subtraction */
+    Fraction operator-(const Fraction& other) const {
+        T n = num * other.den - other.num * den;
+        T d = den * other.den;
+        return Fraction(n, d);
+    }
+
+    /** Multiplication */
+    Fraction operator*(const Fraction& other) const {
+        T n = num * other.num;
+        T d = den * other.den;
+        return Fraction(n, d);
+    }
+
+    /** Division via inverse */
+    Fraction operator/(const Fraction& other) const {
+        return (*this) * other.inv();
+    }
 };
 
+/**
+ * Stream output operator.
+ * Prints:
+ *  - "Infinity" if den == 0
+ *  - integer if den == 1
+ *  - num/den otherwise
+ */
+template<typename T>
+std::ostream& operator<<(std::ostream& os, const Fraction<T>& f) {
+    if (f.den == 0) return os << "Infinity";
+    if (f.den == 1) return os << f.num;
+    return os << f.num << "/" << f.den;
+}
 
+using Fll = Fraction<ll>;
+
+
+/**
+ * Line<T>
+ * --------
+ * Represents a 2D line using:
+ *  - slope (Fraction)
+ *  - intercept (Fraction)
+ *
+ * For vertical lines:
+ *  - slope = Infinity
+ *  - intercept = x constant
+ */
 template <typename T>
 struct Line {
     Fraction<T> slope;
@@ -38,6 +131,10 @@ struct Line {
     long long len_sqr;
     bool is_vertical;
 
+    /**
+     * Constructs line passing through (x1,y1) and (x2,y2).
+     * Stores squared length for additional comparisons.
+     */
     Line(T x1, T y1, T x2, T y2) {
         T dx = x2 - x1;
         T dy = y2 - y1;
@@ -50,16 +147,24 @@ struct Line {
         } else {
             is_vertical = false;
             slope = Fraction<T>(dy, dx);
-            intercept = Fraction<T>(1LL * slope.den * y1 - 1LL * slope.num * x1, slope.den);
+            intercept = Fraction<T>(
+                1LL * slope.den * y1 - 1LL * slope.num * x1,
+                slope.den
+            );
         }
     }
 
+    /** Two lines are equal if slope and intercept match */
     bool operator==(const Line& other) const {
         return slope == other.slope && intercept == other.intercept;
     }
 };
 
 
+/**
+ * Custom 64-bit hash using splitmix64.
+ * Safe for unordered_map in CP.
+ */
 struct CustomHash {
     static uint64_t splitmix64(uint64_t x) {
         x += 0x9e3779b97f4a7c15;
@@ -69,16 +174,22 @@ struct CustomHash {
     }
 
     size_t operator()(uint64_t x) const {
-        static const uint64_t FIXED_RANDOM = chrono::steady_clock::now().time_since_epoch().count();
+        static const uint64_t FIXED_RANDOM =
+            chrono::steady_clock::now().time_since_epoch().count();
         return splitmix64(x + FIXED_RANDOM);
     }
 };
 
+
+/** Combines hashes (boost-style) */
 template <typename T>
 inline void hash_combine(std::size_t& seed, const T& val) {
-    seed ^= CustomHash{}(std::hash<std::decay_t<T>>{}(val)) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+    seed ^= CustomHash{}(std::hash<std::decay_t<T>>{}(val))
+            + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 }
 
+
+/** Hash support for Fraction */
 namespace std {
     template <typename T>
     struct hash<Fraction<T>> {
@@ -91,6 +202,7 @@ namespace std {
     };
 }
 
+/** Hash support for Line */
 namespace std {
     template <typename T>
     struct hash<Line<T>> {
@@ -104,9 +216,8 @@ namespace std {
         }
     };
 }
+
 ]]></content>
   <tabTrigger>snpLINE</tabTrigger>
   <description>Geo-Line</description>
-  <!-- Optional: Set a scope to limit where the snippet will trigger -->
-  <!-- <scope >source.python</scope > -->
 </snippet>
