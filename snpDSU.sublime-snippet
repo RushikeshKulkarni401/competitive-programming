@@ -1,54 +1,117 @@
 <snippet>
   <content><![CDATA[
-// DSU with path compression & small to large merge
+/*
+ * Disjoint Set Union (Union Find)
+ *
+ * Features:
+ * - Path compression in find()
+ * - Union by size (small-to-large merging)
+ * - Tracks number of connected components
+ * - Can extract full component structure
+ *
+ * Time Complexity:
+ * - find()   : Amortized O(alpha(N))
+ * - merge()  : Amortized O(alpha(N))
+ * - same()   : Amortized O(alpha(N))
+ */
+
 struct DSU {
-    std::vector<int> parent, siz;
-    int comps;
-    
+    std::vector<int> parent;   // parent[i] = parent of node i
+    std::vector<int> siz;      // siz[i] = size of component whose leader is i
+    int components;            // number of connected components
+
+    /* Default constructor */
     DSU() {}
+
+    /* Initialize DSU with n isolated nodes [0...n-1] */
     DSU(int n) {
         init(n);
     }
-    
+
+    /*
+     * Initializes / resets DSU structure
+     * Each node starts as its own component
+     */
     void init(int n) {
         parent.resize(n);
         std::iota(parent.begin(), parent.end(), 0);
         siz.assign(n, 1);
-        comps = n;
+        components = n;
     }
-    
+
+    /*
+     * Finds the leader (representative) of the set
+     * Uses path compression for optimization
+     */
     int find(int x) {
         while (x != parent[x]) {
             x = parent[x] = parent[parent[x]];
         }
         return x;
     }
-    
+
+    /*
+     * Returns true if x and y belong to the same component
+     */
     bool same(int x, int y) {
         return find(x) == find(y);
     }
-    
+
+    /*
+     * Merges the components containing x and y
+     * Uses union by size (small-to-large)
+     *
+     * Returns:
+     * true  -> merge happened
+     * false -> already in same component
+     */
     bool merge(int x, int y) {
         x = find(x);
         y = find(y);
-        if (x == y) {
+
+        if (x == y)
             return false;
-        }
-        // small to large merging
+
         if (siz[x] < siz[y])
-            swap(x, y);
-        siz[x] += siz[y];
+            std::swap(x, y);
+
         parent[y] = x;
-        comps--;
+        siz[x] += siz[y];
+        components--;
+
         return true;
     }
-    
-    int getComps() {
-        return comps;
-    }
 
+    /*
+     * Returns size of component containing x
+     */
     int size(int x) {
         return siz[find(x)];
+    }
+
+    /*
+     * Returns number of connected components
+     */
+    int getComponentCount() {
+        return components;
+    }
+
+    /*
+     * Returns all components in the structure
+     * Intended for final/offline queries only.
+     * Output format:
+     * leader -> list of nodes in that component
+     * Complexity: O(n α(n)).
+     */
+    std::unordered_map<int, std::vector<int>> getComponents() {
+        std::unordered_map<int, std::vector<int>> comps;
+
+        for (int i = 0; i < parent.size(); i++) {
+            int leader = find(i);
+            comps[leader].push_back(i);
+        }
+
+        return comps;
     }
 };
 ]]></content>
