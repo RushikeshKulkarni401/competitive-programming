@@ -1,0 +1,90 @@
+<snippet>
+  <content><![CDATA[
+/*
+ * TopK Container
+ *
+ * Maintains the best K elements according to the comparator.
+ *
+ * Example:
+ *   MaxK<int> mx3(3);      // 3 largest elements
+ *   MinK<int> mn5(5);   // 5 smallest elements
+ *
+ * Complexity:
+ *   insert  : O(log K)
+ *   boundary: O(1)
+ *   size    : O(1)
+ */
+
+template<typename T, typename Compare>
+struct TopK {
+
+    int k;
+    priority_queue<T, vector<T>, Compare> pq;
+
+    TopK(int k) : k(k) {}
+
+    /*
+     * Insert a value into the container.
+     * Keeps only the best K elements.
+     */
+    void insert(const T& val) {
+
+        if ((int)pq.size() < k) {
+            pq.push(val);
+            return;
+        }
+
+        if (Compare()(val, pq.top())) {
+            pq.pop();
+            pq.push(val);
+        }
+    }
+
+    /*
+     * Returns number of stored elements
+     */
+    int size() const {
+        return pq.size();
+    }
+
+    /*
+     * Returns the boundary element (worst among the stored K)
+     */
+    T boundary() const {
+        return pq.top();
+    }
+
+    /*
+     * Returns stored elements (unordered)
+     */
+    vector<T> getElements() {
+        vector<T> res;
+        auto temp = pq;
+
+        while (!temp.empty()) {
+            res.push_back(temp.top());
+            temp.pop();
+        }
+        std::reverse(res.begin(), res.end());
+        return res;
+    }
+};
+
+/*
+ * Stores K largest elements
+ */
+template<typename T>
+using MaxK = TopK<T, greater<T>>;
+
+/*
+ * Stores K smallest elements
+ */
+template<typename T>
+using MinK = TopK<T, less<T>>;
+
+]]></content>
+  <tabTrigger>snpTOPK</tabTrigger>
+  <description>Stores Top K elements</description>
+  <!-- Optional: Set a scope to limit where the snippet will trigger -->
+  <!-- <scope >source.python</scope > -->
+</snippet>
