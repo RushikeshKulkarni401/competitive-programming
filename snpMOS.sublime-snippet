@@ -5,63 +5,66 @@
  *
  * Supports:
  *   - Offline range queries on static array
+ *   - Each query can carry custom Info (payload)
  *   - Complexity: O( (N + Q) * sqrt(N) )
  *
  * How to use:
  *   1. Fill your array `a[]`
  *   2. Implement add(pos), remove(pos)
- *   3. Implement get_answer()
- *   4. Add queries using add_query(l, r, idx)
+ *   3. Implement get_answer(query)
+ *   4. Add queries using add_query(l, r, idx, info)
  *   5. Call process() → returns vector of (idx, answer)
  *
- * This template stores queries in (l, r, idx) and sorts by Mo’s order.
- * Block size = sqrt(n).  Query order reduces add/remove operations.
+ * This template stores queries as (l, r, idx, info)
  */
 
-template<typename T, typename U>
+template<typename Info, typename U>
 class MosAlgorithm {
 private:
     int n, block_size;
 
-    // each query is (l, r, original_index)
-    vector<tuple<int,int,int>> queries;
+    struct Query {
+        int l, r, idx;
+        Info info;
 
-    // user-defined callbacks (all required)
-    function<void(int)> add_cb;         // add element at index
-    function<void(int)> remove_cb;      // remove element at index
-    function<U()> get_answer_cb;        // return answer for current window
+        Query(int _l, int _r, int _idx, const Info& _info)
+            : l(_l), r(_r), idx(_idx), info(_info) {}
+    };
+
+    vector<Query> queries;
+
+    // user-defined callbacks
+    function<void(int)> add_cb;
+    function<void(int)> remove_cb;
+    function<U(const Query&)> get_answer_cb;
 
 public:
     MosAlgorithm(int _n,
                  function<void(int)> _add,
                  function<void(int)> _remove,
-                 function<U()> _get_ans)
+                 function<U(const Query&)> _get_ans)
         : n(_n), add_cb(_add), remove_cb(_remove), get_answer_cb(_get_ans)
     {
         block_size = sqrt(n) + 1;
     }
 
-    // add query [l, r]
-    inline void add_query(int l, int r, int idx) {
-        queries.emplace_back(l, r, idx);
+    // add query [l, r] with custom info
+    inline void add_query(int l, int r, int idx, const Info& info = Info()) {
+        queries.emplace_back(l, r, idx, info);
     }
 
     // run Mo's algorithm → returns answers (idx, answer)
     vector<pair<int,U>> process() {
         // Sort queries in Mo order
-        sort(queries.begin(), queries.end(), [&](auto &A, auto &B) {
-            auto [l1, r1, i1] = A;
-            auto [l2, r2, i2] = B;
-
-            int b1 = l1 / block_size;
-            int b2 = l2 / block_size;
+        sort(queries.begin(), queries.end(), [&](const Query &A, const Query &B) {
+            int b1 = A.l / block_size;
+            int b2 = B.l / block_size;
 
             if (b1 != b2) return b1 < b2;
 
-            // EVEN-ODD optimization (optional) :: need to study more on this
-            // not always works
-            // return (b1 & 1) ? r1 > r2 : r1 < r2; 
-            return r1 < r2; // works always
+            // EVEN-ODD optimization (optional)
+            // return (b1 & 1) ? A.r > B.r : A.r < B.r;
+            return A.r < B.r;
         });
 
         vector<pair<int,U>> answers;
@@ -69,34 +72,32 @@ public:
 
         int cur_l = 0, cur_r = -1;
 
-        for (auto &[l, r, idx] : queries) {
+        for (const auto &q : queries) {
             // Expand / shrink to [l, r]
 
-            // expand right
-            while (cur_r < r) add_cb(++cur_r);
+            while (cur_r < q.r) add_cb(++cur_r);
+            while (cur_r > q.r) remove_cb(cur_r--);
+            while (cur_l > q.l) add_cb(--cur_l);
+            while (cur_l < q.l) remove_cb(cur_l++);
 
-            // shrink right
-            while (cur_r > r) remove_cb(cur_r--);
-
-            // expand left
-            while (cur_l > l) add_cb(--cur_l);
-
-            // shrink left
-            while (cur_l < l) remove_cb(cur_l++);
-            
-            // get answer for this query window
-            answers.emplace_back(idx, get_answer_cb());
+            // get answer for this query
+            answers.emplace_back(q.idx, get_answer_cb(q));
         }
 
         return answers;
     }
 };
-
 /*
 =========================== USAGE EXAMPLE ===========================
 
 int n = ...;
 vector<int> a(n);
+
+// Define query payload (customize per problem)
+struct Info {
+    int k;        // example parameter
+    // add more fields if needed
+};
 
 // Your frequency array or DS
 vector<int> freq(MAXN);
@@ -114,19 +115,21 @@ auto remove_cb = [&](int i) {
     // update freq and answer
 };
 
-// Return answer for current window
-auto get_answer_cb = [&]() -> long long {
+// Return answer for current window (can use query info)
+auto get_answer_cb = [&](const auto& q) -> long long {
+    int k = q.info.k;  // access custom parameter
+    // compute answer using k (if needed)
     return cur_answer;
 };
 
 // Build Mo structure
-MosAlgorithm<int,long long> mo(n, add_cb, remove_cb, get_answer_cb);
+MosAlgorithm<Info, long long> mo(n, add_cb, remove_cb, get_answer_cb);
 
 // Add queries
 for (int qi = 0; qi < q; qi++) {
-    int l, r;
-    cin >> l >> r;
-    mo.add_query(l, r, qi);
+    int l, r, k;
+    cin >> l >> r >> k;
+    mo.add_query(l, r, qi, {k});  // pass Info
 }
 
 // Process queries
