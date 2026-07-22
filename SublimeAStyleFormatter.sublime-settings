@@ -1,0 +1,12 @@
+{
+    "autoformat_on_save": true,
+    "options_default": {
+        "add-brackets": false,
+        "align-pointer": "type",
+        "pad-oper": true,
+        "pad-header": true,
+        "unpad-paren": true,
+        "indent-switches": true,
+        "indent-labels": true
+    }
+}

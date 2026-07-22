@@ -63,9 +63,9 @@ struct Fraction {
      * Throws if fraction is zero.
      */
     Fraction inv() const {
-        if (num == 0) {
-            throw std::runtime_error("Division by zero fraction");
-        }
+        // if (num == 0) {
+        //     throw std::runtime_error("Division by zero fraction");
+        // }
         return Fraction(den, num);
     }
 
@@ -128,29 +128,37 @@ template <typename T>
 struct Line {
     Fraction<T> slope;
     Fraction<T> intercept; // If vertical, this is x = constant
-    long long len_sqr;
+    Fraction<T> len_sqr;
     bool is_vertical;
 
     /**
      * Constructs line passing through (x1,y1) and (x2,y2).
      * Stores squared length for additional comparisons.
      */
-    Line(T x1, T y1, T x2, T y2) {
-        T dx = x2 - x1;
-        T dy = y2 - y1;
-        len_sqr = 1LL * dx * dx + 1LL * dy * dy;
+    Line(Fraction<T> x1, Fraction<T> y1, Fraction<T> x2, Fraction<T> y2) {
+        Fraction<T> dx = x2 - x1;
+        Fraction<T> dy = y2 - y1;
+        len_sqr = dx * dx + dy * dy;
 
         if (dx == 0) {
             is_vertical = true;
             slope = Fraction<T>(1, 0); // vertical slope
-            intercept = Fraction<T>(x1, 1); // x = constant
+            intercept = x1; // x = constant
         } else {
             is_vertical = false;
-            slope = Fraction<T>(dy, dx);
-            intercept = Fraction<T>(
-                1LL * slope.den * y1 - 1LL * slope.num * x1,
-                slope.den
-            );
+            slope = dy / dx;
+            intercept = (Fraction<T>(slope.den) * y1 - Fraction<T>(slope.num) * x1) / Fraction<T>(slope.den);
+
+        }
+    }
+
+    // slope point form
+    Line(Fraction<T> m, Fraction<T> x1, Fraction<T> y1) {
+        slope = m;
+        if (slope.isInfinity()) {
+            intercept = x1;
+        } else {
+            intercept = y1 - m * x1;
         }
     }
 
@@ -184,37 +192,37 @@ struct CustomHash {
 /** Combines hashes (boost-style) */
 template <typename T>
 inline void hash_combine(std::size_t& seed, const T& val) {
-    seed ^= CustomHash{}(std::hash<std::decay_t<T>>{}(val))
+    seed ^= CustomHash{}(std::hash<std::decay_t<T>> {}(val))
             + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 }
 
 
 /** Hash support for Fraction */
 namespace std {
-    template <typename T>
-    struct hash<Fraction<T>> {
-        size_t operator()(const Fraction<T>& f) const {
-            size_t seed = 0;
-            hash_combine(seed, f.num);
-            hash_combine(seed, f.den);
-            return seed;
-        }
-    };
+template <typename T>
+struct hash<Fraction<T>> {
+    size_t operator()(const Fraction<T>& f) const {
+        size_t seed = 0;
+        hash_combine(seed, f.num);
+        hash_combine(seed, f.den);
+        return seed;
+    }
+};
 }
 
 /** Hash support for Line */
 namespace std {
-    template <typename T>
-    struct hash<Line<T>> {
-        size_t operator()(const Line<T>& l) const {
-            size_t seed = 0;
-            hash_combine(seed, l.slope);
-            hash_combine(seed, l.intercept);
-            hash_combine(seed, l.len_sqr);
-            hash_combine(seed, l.is_vertical);
-            return seed;
-        }
-    };
+template <typename T>
+struct hash<Line<T>> {
+    size_t operator()(const Line<T>& l) const {
+        size_t seed = 0;
+        hash_combine(seed, l.slope);
+        hash_combine(seed, l.intercept);
+        hash_combine(seed, l.len_sqr);
+        hash_combine(seed, l.is_vertical);
+        return seed;
+    }
+};
 }
 
 ]]></content>

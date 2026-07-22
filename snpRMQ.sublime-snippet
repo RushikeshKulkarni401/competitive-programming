@@ -1,0 +1,35 @@
+<snippet>
+  <content><![CDATA[
+template<class T, T (*op)(const T&, const T&)>
+struct RMQ {
+    int n;
+    vector<vector<T>> st;
+
+    RMQ(const vector<T>& v) : n(sz(v)), st(1, v) {
+        for (int pw = 1, k = 1; pw * 2 <= sz(v); pw *= 2, ++k) {
+            st.emplace_back(sz(v) - pw * 2 + 1);
+            rep(i, 0, sz(st[k]))
+                st[k][i] = op(st[k - 1][i], st[k - 1][i + pw]);
+        }
+    }
+
+    T query(int l, int r) { // [l, r)
+        assert(l >= 0);
+        assert(l < r);
+        assert(r <= n);
+        int k = 31 - __builtin_clz(r - l);
+        return op(st[k][l], st[k][r - (1 << k)]);
+    }
+};
+
+template<class T>
+using RMQ_MIN = RMQ<T, (T(*)(const T&, const T&))min>;
+
+template<class T>
+using RMQ_MAX = RMQ<T, (T(*)(const T&, const T&))max>;
+]]></content>
+  <tabTrigger>snpRMQ</tabTrigger>
+  <description>RMQ</description>
+  <!-- Optional: Set a scope to limit where the snippet will trigger -->
+  <!-- <scope >source.python</scope > -->
+</snippet>
