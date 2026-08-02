@@ -1,6 +1,27 @@
+#pragma once
 #include <bits/stdc++.h>
 using namespace std;
 #define dbg(...) __f(#__VA_ARGS__,__VA_ARGS__)
+
+// ---- forward declarations (so nested containers resolve regardless of
+// definition order below, e.g. map<int, vector<int>> or vector<list<int>>) ----
+template<class L,class R> std::ostream& operator<<(std::ostream& os,std::pair<L,R>& P);
+template<class T> std::ostream& operator<<(std::ostream& os,std::vector<T>& V);
+template<class T> std::ostream& operator<<(std::ostream& os,std::list<T>& L);
+template<class L,class R> std::ostream& operator<<(std::ostream& os,std::map<L,R>& MP);
+template<class L,class R> std::ostream& operator<<(std::ostream& os,std::unordered_map<L,R>& MP);
+template<class T> std::ostream& operator<<(std::ostream& os,std::set<T>& S);
+template<class T> std::ostream& operator<<(std::ostream& os, std::set<T, std::greater<T>>& S);
+template<class T> std::ostream& operator<<(std::ostream& os,std::unordered_set<T>& S);
+template<class T> std::ostream& operator<<(std::ostream& os,std::multiset<T>& S);
+template<class T> std::ostream& operator<<(std::ostream& os, std::multiset<T, std::greater<T>>& S);
+template<class T> std::ostream& operator<<(std::ostream& os,std::stack<T> st);
+template<class T> std::ostream& operator<<(std::ostream& os,std::queue<T> q);
+template<class T> std::ostream& operator<<(std::ostream& os, std::deque<T>& D);
+template<class T, size_t S> std::ostream& operator<<(std::ostream& os,std::array<T, S> V);
+template<class T> std::ostream& operator<<(std::ostream& os, std::priority_queue<T> pq);
+template<class T> std::ostream& operator<<(std::ostream& os, std::priority_queue<T, std::vector<T>, std::greater<T>> pq);
+
 // trace std::pair
 template<class L,class R> std::ostream& operator<<(std::ostream& os,std::pair<L,R>& P){
 	return os<<"{"<<P.first<<":"<<P.second<<"}";
@@ -8,6 +29,10 @@ template<class L,class R> std::ostream& operator<<(std::ostream& os,std::pair<L,
 // trace std::vector
 template<class T> std::ostream& operator<<(std::ostream& os,std::vector<T>& V){
 	os<<"[ ";for(auto v:V)os<<v<<" ";return os<<"]";
+}
+// trace std::list
+template<class T> std::ostream& operator<<(std::ostream& os,std::list<T>& L){
+	os<<"[ ";for(auto v:L)os<<v<<" ";return os<<"]";
 }
 // trace std::map;
 template<class L,class R> std::ostream& operator<<(std::ostream& os,std::map<L,R>& MP) {
@@ -131,7 +156,6 @@ template <typename Arg1,typename... Args>
 void __f(const char* names,Arg1&& arg1,Args&&... args){
 	const char* comma=strchr(names+1,',');std::cout.write(names,comma-names)<<" : "<<arg1<<" | ";__f(comma+1,args...);
 }
-
 
 // X.find_by_order(k) return iterator to kth element. 0 indexed.
 // X.order_of_key(k) returns count of elements strictly less than k.
