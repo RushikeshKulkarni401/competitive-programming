@@ -1,0 +1,197 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define dbg(...) __f(#__VA_ARGS__,__VA_ARGS__)
+// trace std::pair
+template<class L,class R> std::ostream& operator<<(std::ostream& os,std::pair<L,R>& P){
+	return os<<"{"<<P.first<<":"<<P.second<<"}";
+}
+// trace std::vector
+template<class T> std::ostream& operator<<(std::ostream& os,std::vector<T>& V){
+	os<<"[ ";for(auto v:V)os<<v<<" ";return os<<"]";
+}
+// trace std::map;
+template<class L,class R> std::ostream& operator<<(std::ostream& os,std::map<L,R>& MP) {
+	os<<"[ ";for(auto& P : MP) os<<P<<" ";return os<<"]";
+}
+// trace unordred_std::map
+template<class L,class R> std::ostream& operator<<(std::ostream& os,std::unordered_map<L,R>& MP) {
+	os<<"[ ";for(auto& P : MP) os<<P<<" ";return os<<"]";
+}
+// trace std::set
+template<class T> std::ostream& operator<<(std::ostream& os,std::set<T>& S){
+	os<<"[ ";for(auto s:S)os<<s<<" ";return os<<"]";
+}
+// Debugging for std::set<int, std::greater<int>> (custom comparator)
+template<class T>
+std::ostream& operator<<(std::ostream& os, std::set<T, std::greater<T>>& S) {
+	os << "[ ";
+	for (auto s : S) os << s << " ";
+	return os << "]";
+}
+// trace std::unordered_set
+template<class T> std::ostream& operator<<(std::ostream& os,std::unordered_set<T>& S){
+	os<<"[ ";for(auto s:S)os<<s<<" ";return os<<"]";
+}
+// trace std::multiset
+template<class T> std::ostream& operator<<(std::ostream& os,std::multiset<T>& S){
+	os<<"[ ";for(auto s:S)os<<s<<" ";return os<<"]";
+}
+// Debugging for std::set<int, std::greater<int>> (custom comparator)
+template<class T>
+std::ostream& operator<<(std::ostream& os, std::multiset<T, std::greater<T>>& S) {
+	os << "[ ";
+	for (auto s : S) os << s << " ";
+	return os << "]";
+}
+// std::stack FUN
+template <class T>
+void F_Stack(std::stack<T> st, std::string& cont) {
+	if (st.empty()) return;
+	T mem = st.top();
+	st.pop();
+	F_Stack(st, cont);
+	// Use stringstream to handle any type T
+	std::stringstream ss;
+	ss << mem;
+	cont += " " + ss.str();
+}
+// trace std::stack                                                  
+template<class T> std::ostream& operator<<(std::ostream& os,std::stack<T> st) {
+	os<<"[";std::string cont="";F_Stack(st,cont);return os<<cont<<" ]";
+}
+// track std::queue
+template<class T> std::ostream& operator<<(std::ostream& os,std::queue<T> q) {
+	os<<"[ ";while(!q.empty()) os<<q.front()<<" ",q.pop();return os<<"]";
+}
+// Debugging for std::deque
+template<class T>
+std::ostream& operator<<(std::ostream& os, std::deque<T>& D) {
+	os << "[ ";
+	for (auto& d : D) os << d << " ";
+	return os << "]";
+}
+// dbg std::std::array
+template<class T, size_t S> std::ostream& operator<<(std::ostream& os,std::array<T, S> V){
+	os<<"[ ";for(auto v:V)os<<v<<" ";return os<<"]";
+}
+// Debugging for max-heap (default priority queue)
+template <class T>
+void F_PriorityQueue(std::priority_queue<T> pq, std::string& cont) {
+	while (!pq.empty()) {
+		T mem = pq.top();
+		pq.pop();
+		
+		// Use stringstream for general types
+		std::stringstream ss;
+		ss << mem;
+		cont += " " + ss.str();
+	}
+}
+
+// Debugging for min-heap (custom comparator)
+template <class T>
+void F_MinPriorityQueue(std::priority_queue<T, std::vector<T>, std::greater<T>> pq, std::string& cont) {
+	while (!pq.empty()) {
+		T mem = pq.top();
+		pq.pop();
+		
+		// Use stringstream for general types
+		std::stringstream ss;
+		ss << mem;
+		cont += " " + ss.str();
+	}
+}
+
+// Debug function for priority queue (max-heap)
+template<class T>
+std::ostream& operator<<(std::ostream& os, std::priority_queue<T> pq) {
+	os << "[";
+	std::string cont = "";
+	F_PriorityQueue(pq, cont);
+	return os << cont << " ]";
+}
+
+// Debug function for min-heap priority queue
+template<class T>
+std::ostream& operator<<(std::ostream& os, std::priority_queue<T, std::vector<T>, std::greater<T>> pq) {
+	os << "[";
+	std::string cont = "";
+	F_MinPriorityQueue(pq, cont);
+	return os << cont << " ]";
+}
+
+
+// for last arg.
+template<typename Arg1>
+void __f(const char* name,Arg1&& arg1){
+	std::cout<<name<<" : "<<arg1<<std::endl;
+}
+// for variable arg
+template <typename Arg1,typename... Args>
+void __f(const char* names,Arg1&& arg1,Args&&... args){
+	const char* comma=strchr(names+1,',');std::cout.write(names,comma-names)<<" : "<<arg1<<" | ";__f(comma+1,args...);
+}
+
+
+// X.find_by_order(k) return iterator to kth element. 0 indexed.
+// X.order_of_key(k) returns count of elements strictly less than k.
+ 
+// ** behaviour of lower_bound and upper_bound are reversed in ordered_multiset ** // 
+// #define ook order_of_key
+// #define fbo find_by_order 
+// #include <ext/pb_ds/assoc_container.hpp>
+// #include <ext/pb_ds/tree_policy.hpp>
+// template <class T>
+// using ordered_set =  __gnu_pbds::tree<T,__gnu_pbds::null_type,less<T>,__gnu_pbds::rb_tree_tag,__gnu_pbds::tree_order_statistics_node_update>;
+// template <class T>
+// using ordered_multiset =  __gnu_pbds::tree<T,__gnu_pbds::null_type,less_equal<T>,__gnu_pbds::rb_tree_tag,__gnu_pbds::tree_order_statistics_node_update>;
+ 
+
+#define all(x) (x).begin(), (x).end()
+#define rall(x) (x).rbegin(), (x).rend()
+#define sz(x) ((ll)(x).size())
+#define nl '\n'
+#define pb push_back
+#define eb emplace_back
+#define fi first
+#define se second
+#define uniq(x) {x.erase(unique(all(x)), x.end()); }
+#define rep(i,a,b) for (int i=(int)(a);i<(int)(b);i++)
+
+using ll = long long int;
+using i128 = __int128;
+using pii = pair<int,int>;
+using pll = pair<ll,ll>;
+using mii = map<int,int>;
+using mll = map<ll,ll>;	
+using umii = unordered_map<int,int>;
+using umll = unordered_map<ll,ll>;
+using vi = vector<int>;
+using vpii = vector<pii>;
+using vpll = vector<pll>;
+using vvi = vector<vi>;
+using vvvi = vector<vvi>;
+using vvii = vector<vpii>;
+using vl = vector<ll>;
+using vvl = vector<vl>;
+using vvvl = vector<vvl>;
+using vvpii = vector<vpii>;
+using vvpll = vector<vpll>;
+template<class T> using _priority_queue = priority_queue<T, vector<T>, greater<T>>;
+
+template<class T, class U> bool chmin(T& a, const U& b) { return b < a ? a = b, 1 : 0; }
+template<class T, class U> bool chmax(T& a, const U& b) { return a < b ? a = b, 1 : 0; }
+template<class T, class U> auto min(const T& a, const U& b) -> typename std::common_type<T, U>::type { return b < a ? b : a; }
+template<class T, class U> auto max(const T& a, const U& b) -> typename std::common_type<T, U>::type { return b > a ? b : a; }
+template<class T> int LB(vector<T> &v,T a){return lower_bound(v.begin(),v.end(),a)-v.begin();}
+template<class T> int UB(vector<T> &v,T a){return upper_bound(v.begin(),v.end(),a)-v.begin();}
+template<class T> T vec_min(vector<T> &a){assert(!a.empty());T ans=a[0];for(auto &x:a) chmin(ans,x);return ans;}
+template<class T> T vec_max(vector<T> &a){assert(!a.empty());T ans=a[0];for(auto &x:a) chmax(ans,x);return ans;}
+template<class T> T vec_sum(vector<T> &a){T ans=T(0);for(auto &x:a) ans+=x;return ans;}
+
+
+const ll INF = 1e9;
+const ll N = 1e5+5;
+
+#define here() dbg(__LINE__)
+// #define dbg(...) "Think about corner cases before hit submit"
