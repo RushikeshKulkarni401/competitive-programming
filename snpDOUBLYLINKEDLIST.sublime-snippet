@@ -24,7 +24,7 @@ struct DoublyLinkedList {
         Node() : info(), prev(nullptr), next(nullptr) {}
         Node(T _info) : info(_info), prev(nullptr), next(nullptr) {}
 
-        friend ostream& operator<<(ostream& os, const Node* node) {
+        friend ostream& operator<<(ostream& os, Node* node) {
             if (node == nullptr) return os << "NULL";
             return os << "{info: " << node->info << "}";
         }
