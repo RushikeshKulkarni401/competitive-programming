@@ -1,23 +1,48 @@
 <snippet>
   <content><![CDATA[
+
+/*
+    DLL_Index<T, MAXN>: doubly linked list backed by a fixed-size array --
+    no heap allocation, and no self-referential pointers, so the whole
+    structure is POD: safe to copy, store by value, or reset.
+
+    A node is identified by a plain `int` id (returned by push_back /
+    push_front / insert_at). You never touch the array directly -- walk and
+    read/write through the container's own methods.
+
+    constexpr size_t MAX_SIZE = 1e5 + 5;
+    DLL_Index<ll, MAX_SIZE> dll;
+
+    int a = dll.push_back(1);
+    int b = dll.push_back(2);
+    int c = dll.push_front(0);          // -> [0, 1, 2]
+    int d = dll.insert_at(1, 5);        // -> [0, 5, 1, 2]   (0 <= index <= size())
+
+    dll.erase(b);                       // remove by id, O(1)
+
+    dll.val(a) = 10;                    // read/write the value
+    T v = dll.val(a);
+    dll.next(a);  dll.prev(a);          // neighboring id, or NONE at the ends
+
+    dll.size(); dll.empty();
+    dll.get_head(); dll.get_tail();     // id, or NONE if empty
+    dll.clear();
+
+    NONE (-1) marks "no such node" everywhere (ends of the list, or a
+    missing neighbor) -- check `id != DLL_Index<T, MAXN>::NONE` or just `!= -1`.
+
+    Note: slots come from a monotonically increasing counter (erase()
+    unlinks but doesn't recycle the slot), so the list can hold at most
+    MAXN pushes over its lifetime, not just MAXN alive at once.
+*/
+
 template<class T, size_t MAXN>
 struct DLL_Index {
+    static constexpr int NONE = -1;
 
-public:
-    struct Node {
-        T val;
-        int prev, next;
-
-        friend ostream& operator<<(ostream& os, const Node& node) {
-            return os << "{val: " << node.val << "}";
-        }
-    };
-
-    int push_back(T val) {
-        int id = nxt_id++;
-        nodes[id] = {val, -1, -1};
-
-        if (head == -1) {
+    int push_back(T v) {
+        int id = alloc(v);
+        if (head == NONE) {
             head = tail = id;
         } else {
             nodes[tail].next = id;
@@ -28,18 +53,64 @@ public:
         return id;
     }
 
-    void erase(int id) {
-        int prv = nodes[id].prev;
-        int nxt = nodes[id].next;
+    int push_front(T v) {
+        int id = alloc(v);
+        if (head == NONE) {
+            head = tail = id;
+        } else {
+            nodes[id].next = head;
+            nodes[head].prev = id;
+            head = id;
+        }
+        siz++;
+        return id;
+    }
 
-        if (prv == -1 && nxt == -1) {
-            head = tail = -1;
-        } else if (prv == -1) {
+    // Inserts `v` immediately before node `pos` (NONE => append).
+    int insert_before(int pos, T v) {
+        if (pos == NONE) return push_back(v);
+        if (pos == head) return push_front(v);
+
+        int id = alloc(v);
+        int before = nodes[pos].prev;
+        nodes[before].next = id;
+        nodes[id].prev = before;
+        nodes[id].next = pos;
+        nodes[pos].prev = id;
+        siz++;
+        return id;
+    }
+
+    // Inserts `v` at 0-based `index` (0 <= index <= size()); walks from
+    // whichever end is closer, so O(min(index, size - index)).
+    int insert_at(int index, T v) {
+        assert(index >= 0 && index <= siz);
+        if (index == siz) return push_back(v);
+        if (index == 0) return push_front(v);
+
+        int cur;
+        if (index <= siz - index) {
+            cur = head;
+            for (int i = 0; i < index; i++) cur = nodes[cur].next;
+        } else {
+            cur = tail;
+            for (int i = siz - 1; i > index; i--) cur = nodes[cur].prev;
+        }
+        return insert_before(cur, v);
+    }
+
+    void erase(int id) {
+        assert(id != NONE);
+        int prv = nodes[id].prev, nxt = nodes[id].next;
+
+        if (prv == NONE && nxt == NONE) {
+            head = tail = NONE;
+        } else if (prv == NONE) {
             head = nxt;
-            nodes[nxt].prev = -1;
-        } else if (nxt == -1) {
+            nodes[nxt].prev = NONE;
+        } else if (nxt == NONE) {
             tail = prv;
-            nodes[prv].next = -1;
+            nodes[prv].next = NONE;
         } else {
             nodes[prv].next = nxt;
             nodes[nxt].prev = prv;
@@ -47,71 +118,49 @@ public:
         siz--;
     }
 
-    Node* get_node(int id) {
-        return &nodes[id];
-    }
-
-    Node& operator[](int id) { return nodes[id]; }
-    const Node& operator[](int id) const { return nodes[id]; }
+    T&  val(int id)  { return nodes[id].val; }
+    int next(int id) const { return nodes[id].next; }
+    int prev(int id) const { return nodes[id].prev; }
 
     int get_head() const { return head; }
     int get_tail() const { return tail; }
 
     void clear() {
-        head = tail = -1;
+        head = tail = NONE;
         siz = nxt_id = 0;
     }
 
-    bool empty() const {
-        return siz == 0;
-    }
+    bool empty() const { return siz == 0; }
+    int size() const { return siz; }
 
-    int size() const {
-        return siz;
-    }
-
-    friend ostream& operator<<(ostream& os, const DLL_Index& dll) {
+    friend ostream& operator<<(ostream& os, DLL_Index& dll) {
         os << "[ ";
-        for (int cur = dll.head; cur != -1; cur = dll.nodes[cur].next) {
-            os << dll.nodes[cur];
-            if (dll.nodes[cur].next != -1) os << " <-> ";
+        for (int cur = dll.head; cur != NONE; cur = dll.nodes[cur].next) {
+            os << dll.nodes[cur].val;
+            if (dll.nodes[cur].next != NONE) os << " <-> ";
         }
         return os << " ] (size = " << dll.siz << ")";
     }
 
 private:
+    struct Node {
+        T val;
+        int prev, next;
+    };
+
+    int alloc(T v) {
+        assert(nxt_id < (int)MAXN);
+        int id = nxt_id++;
+        nodes[id] = {v, NONE, NONE};
+        return id;
+    }
+
     Node nodes[MAXN];
-    int head = -1, tail = -1;
+    int head = NONE, tail = NONE;
     int siz = 0;
     int nxt_id = 0;
 };
 
-/*
---------------------- USER GUIDE ---------------------
-constexpr size_t MAX_SIZE = 1e5 + 5;
-DLL_Index<ll, MAX_SIZE> dll; // define with data type ans max_size
-
-int id1 = dll.push_back(1); // track ids after pushing nodes
-int id2 = dll.push_back(2);
-int id3 = dll.push_back(3);
-
-// use these ids to delete nodes
-dll.erase(id2);
-
-// access node with auto (NOT RECOMMENDED, ONLY WORK WITH idx, dll[idx])-
-auto node = dll[id1] or dll.get_node(id1);
-T val = node.val or dll[id1].val // access val from node
-int prvIdx = node.prev or dll[id1].prev; // access prev idx from node
-int nxtIdx = node.next or dll[id1].next // access next idx from node
-// prev/next are -1 if there are no previous/next nodes
-// if they are not -1, again access them with dll[prvIdx/nxtIdx]
-
-dll.size(); // returns size of dll
-dll.empty(); // returns true if dll is empty
-dll.get_head(); // returns index of head
-dll.get_tail(); // returns index of tail
-
-*/
 ]]></content>
   <tabTrigger>snpDOUBLYLINKEDLISTINDEX</tabTrigger>
   <description>Doubly Linked List Fast Impl</description>
