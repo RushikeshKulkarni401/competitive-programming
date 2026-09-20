@@ -7,4 +7,6 @@
 		"Vintage",
 	],
 	"index_files": true,
+	// "auto_complete_include_snippets": false,
+	// "auto_complete_include_snippets_when_typing": false
 }

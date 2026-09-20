@@ -1,13 +1,27 @@
 <snippet>
   <content><![CDATA[
-template<class T>
+
+/*
+    DoublyLinkedList<T>: caller `new`s nodes and pushes/inserts them; the
+    list deletes them via erase()/clear().
+
+    IntDLL dll;
+    IntNode* node = new IntNode(1);
+    dll.push_back(node);
+    dll.push_front(new IntNode(0));
+    dll.insert_at(1, new IntNode(5));   // 0 <= index <= size()
+    dll.erase(node);
+    dll.clear();
+*/
+
+template <class T>
 struct DoublyLinkedList {
     struct Node {
         T info;
         Node* prev;
         Node* next;
 
-        Node() : Node(0) {}
+        Node() : info(), prev(nullptr), next(nullptr) {}
         Node(T _info) : info(_info), prev(nullptr), next(nullptr) {}
 
         friend ostream& operator<<(ostream& os, const Node* node) {
@@ -28,6 +42,65 @@ struct DoublyLinkedList {
             tail = new_node;
         }
         siz++;
+    }
+
+    void push_front(Node* new_node) {
+        assert(new_node != nullptr);
+        if (head == nullptr) {
+            head = tail = new_node;
+        } else {
+            new_node->next = head;
+            head->prev = new_node;
+            head = new_node;
+        }
+        siz++;
+    }
+
+    // Inserts `new_node` immediately before `pos_node` (nullptr => append).
+    void insert_before(Node* pos_node, Node* new_node) {
+        assert(new_node != nullptr);
+
+        if (pos_node == nullptr) {
+            push_back(new_node);
+            return;
+        }
+        if (pos_node == head) {
+            push_front(new_node);
+            return;
+        }
+
+        Node* before = pos_node->prev;
+        before->next = new_node;
+        new_node->prev = before;
+        new_node->next = pos_node;
+        pos_node->prev = new_node;
+        siz++;
+    }
+
+    // Inserts `new_node` at 0-based `index` (0 <= index <= size()); walks
+    // from whichever end is closer, so O(min(index, size - index)).
+    void insert_at(int index, Node* new_node) {
+        assert(index >= 0 && index <= siz);
+        assert(new_node != nullptr);
+
+        if (index == siz) {
+            push_back(new_node);
+            return;
+        }
+        if (index == 0) {
+            push_front(new_node);
+            return;
+        }
+
+        Node* cur;
+        if (index <= siz - index) {          // closer to head, walk forward
+            cur = head;
+            for (int i = 0; i < index; i++) cur = cur->next;
+        } else {                             // closer to tail, walk backward
+            cur = tail;
+            for (int i = siz - 1; i > index; i--) cur = cur->prev;
+        }
+        insert_before(cur, new_node);
     }
 
     void erase(Node* del_node) {
@@ -84,22 +157,13 @@ private:
     int siz;
 };
 
+using ll = long long;
 using IntDLL = DoublyLinkedList<ll>;
 using IntNode = IntDLL::Node;
 
-/*
------------------- USER GUIDE ------------------
-    IntDLL dll; // declaration
-    
-    IntNode* node = new IntNode(1); // creating node
-    dll.push_back(node); // pushes node to the end of DLL
-    dll.delete_node(node); // deletes specified node
+using VecDLL = DoublyLinkedList<vector<int>>;
+using VecNode = VecDLL::Node;
 
-    dll.empty();    // return true if empty
-    dll.size();     // returns size
-    dll.get_head(); // return head
-    dll.get_tail(); // returns tail
-*/
 ]]></content>
   <tabTrigger>snpDOUBLYLINKEDLIST</tabTrigger>
   <description>Doubly Linked List</description>
