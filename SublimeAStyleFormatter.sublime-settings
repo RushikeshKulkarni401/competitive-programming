@@ -1,12 +1,23 @@
 {
     "autoformat_on_save": true,
     "options_default": {
-        "add-brackets": false,
-        "align-pointer": "type",
+        // --- Core Formatting ---
+        "style": "google",
+        "indent": "spaces",
+        "indent-spaces": 4,
+
+        // --- The Brace & Block Expander ---
+        "add-brackets": true,
+        "keep-one-line-blocks": false,
+
+        // --- Clean & Compact Layout ---
         "pad-oper": true,
         "pad-header": true,
         "unpad-paren": true,
         "indent-switches": true,
-        "indent-labels": true
+        
+        // --- Crucial CP Toggles ---
+        "attach-namespaces": true,
+        "attach-classes": true
     }
 }
