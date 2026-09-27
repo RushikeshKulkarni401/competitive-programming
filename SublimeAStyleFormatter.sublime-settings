@@ -8,7 +8,7 @@
 
         // --- The Brace & Block Expander ---
         "add-brackets": true,
-        "keep-one-line-blocks": false,
+        "keep-one-line-blocks": true,
 
         // --- Clean & Compact Layout ---
         "pad-oper": true,
